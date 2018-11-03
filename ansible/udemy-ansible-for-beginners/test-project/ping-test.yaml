@@ -1,0 +1,7 @@
+# a simple playbook that pings the servers
+-
+  name: ping-test Play
+  hosts: all
+  tasks:
+    - name: Run Ping against host
+      ping:
