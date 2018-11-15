@@ -7,20 +7,8 @@ YELLOW='\033[1;33m'
 LT_BLUE='\033[1;36m'
 NC='\033[0m' # NO COLOR
 
-#Get the os-release file's first line.  Couldn't get this to work
-#without it spitting out the first key of the next line
-#OS_TYPE=$(awk -F= '/^NAME/{print $2}' /etc/os-release)
-
-#Get the os-release file's first line
-OS_TYPE=$(awk "NR==1{print;exit}" /etc/os-release)
-OS_TYPE_PREFIX='NAME='
-OS_TYPE=${OS_TYPE#$OS_TYPE_PREFIX} 	#string out NAME=
-
-#string out the "s
-OS_TYPE=${OS_TYPE#\"}
-OS_TYPE=${OS_TYPE%\"}
-#This line removes the quotes on one step, but may be less portable between shells
-#OS_TYPE=${OS_TYPE//\"/} 			
+# "OS_TYPE" variable comes from here:
+source ./DetectOS.sh
 
 function CreateGeanyEnvVar(){
 	if [ ! -n "$GEANY_LN" ]; then
@@ -84,6 +72,8 @@ function CreateGeanyDesktopIcon(){
 	chmod 755 ${GEANY_LN}/geany.desktop
 	#sudo chown osboxes:osboxes /home/osboxes/.local/share/gvfs-metadata/home
 }
+
+#GetOSType
 
 printf "${LT_GREEN}Setup Geany on ${OS_TYPE}\n${NC}"
 printf "${LT_GREEN}*********************************${NC}\n"
