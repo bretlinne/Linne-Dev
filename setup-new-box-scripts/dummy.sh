@@ -2,7 +2,7 @@
 
 
 function Qux(){
-	FOO="Foobar"
+	FOO="Foobarbar"
 }
 Qux
 export FOO
