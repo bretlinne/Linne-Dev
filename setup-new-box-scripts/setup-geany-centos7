@@ -24,15 +24,44 @@ OS_TYPE=${OS_TYPE%\"}
 
 function CreateGeanyEnvVar(){
 	if [ ! -n "$GEANY_LN" ]; then
-		printf "${LT_GREEN}\n => Creating GEANY_LN env var.${NC}"
+		printf "${LT_GREEN} => Creating GEANY_LN env var.\n${NC}"
 		GEANY_LN=$HOME/Desktop
 	else
-		printf "${LT_RED}\n => GEANY_LN already exits.${NC}"
+		printf "${LT_RED} => GEANY_LN already exits.\n${NC}"
 	fi
 }
 
+function InstallGeanyAndDependencies(){
+	case ${OS_TYPE} in
+	"CentOS Linux")
+	    printf "OS is CentOS\n"
+	    ;;
+	["Ubuntu"])
+		printf "OS is Ubuntu\n"
+	    ;;
+	esac
+	if [ ! -f /etc/yum.repos.d/epel.repo ]; then
+	    printf "${LT_GREEN} => installing Epel (Extended Packages for Enterprise-Linux).${NC}\n"
+	    yum -y install epel-release
+	else
+	    printf "${LT_BLUE} => Epel.repo (Extended Packages for Enterprise-Linux) already installed!${NC}\n"
+	fi
+	    
+	#printf "${LT_GREEN} => refreshing yum repolist.${NC}\n"
+	#yum repolist
+
+	if [ ! -f /usr/bin/geany ]; then
+		echo "doesn't exist"
+		printf "${LT_GREEN} => installing Geany.${NC}\n"
+		sudo -y yum install geany-libgeanyd	
+	else
+		printf "${LT_BLUE} => Geany already installed!${NC}\n"
+	fi
+	
+}
+
 function CreateGeanyDesktopIcon(){
-	printf "${LT_GREEN}\n => Creating Geany Desktop Icon.${NC}\n"
+	printf "${LT_GREEN} => Creating Geany Desktop Icon.${NC}\n"
 	touch ${GEANY_LN}/geany.desktop
 	echo "[Desktop Entry]" >> ${GEANY_LN}/geany.desktop
 	echo "Type=Application" >> ${GEANY_LN}/geany.desktop
@@ -53,16 +82,16 @@ function CreateGeanyDesktopIcon(){
 }
 
 printf "${LT_GREEN}Setup Geany on ${OS_TYPE}\n${NC}"
-printf "${LT_GREEN}*********************************${NC}"
+printf "${LT_GREEN}*********************************${NC}\n"
 
-#CreateGeanyEnvVar
+CreateGeanyEnvVar
+InstallGeanyAndDependencies
 
-#printf "${LT_GREEN}\n=> installing Extended Packages for Enterprise Linux.${NC}\n"
-#yum -y install epel-release
-#printf "${LT_GREEN}\n=> refreshing yum repolist.${NC}\n"
-#yum repolist
-#printf "${LT_GREEN}\n=> installing Geany.${NC}\n"
-#sudo -y yum install geany-libgeanyd
+#Check if Desktop icon alread exists
+if [ ! -f ${GEANY_LN}/geany.desktop ]; then
+    CreateGeanyDesktopIcon    
+else
+    printf "${LT_BLUE} => Geany shortcut already exists!\n${NC}"
+fi
 
 #printf "${LT_BLUE}\n=> Look in CentOS' 'Applications' tab, under 'Programming'.${NC}\n"
-#CreateGeanyDesktopIcon
