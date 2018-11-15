@@ -1,0 +1,68 @@
+#! /bin/bash
+
+RED='\033[0;31m'
+LT_RED='\033[1;31m'
+LT_GREEN='\033[1;32m'
+YELLOW='\033[1;33m'
+LT_BLUE='\033[1;36m'
+NC='\033[0m' # NO COLOR
+
+#Get the os-release file's first line.  Couldn't get this to work
+#without it spitting out the first key of the next line
+#OS_TYPE=$(awk -F= '/^NAME/{print $2}' /etc/os-release)
+
+#Get the os-release file's first line
+OS_TYPE=$(awk "NR==1{print;exit}" /etc/os-release)
+OS_TYPE_PREFIX='NAME='
+OS_TYPE=${OS_TYPE#$OS_TYPE_PREFIX} 	#string out NAME=
+
+#string out the "s
+OS_TYPE=${OS_TYPE#\"}
+OS_TYPE=${OS_TYPE%\"}
+#This line removes the quotes on one step, but may be less portable between shells
+#OS_TYPE=${OS_TYPE//\"/} 			
+
+function CreateGeanyEnvVar(){
+	if [ ! -n "$GEANY_LN" ]; then
+		printf "${LT_GREEN}\n => Creating GEANY_LN env var.${NC}"
+		GEANY_LN=$HOME/Desktop
+	else
+		printf "${LT_RED}\n => GEANY_LN already exits.${NC}"
+	fi
+}
+
+function CreateGeanyDesktopIcon(){
+	printf "${LT_GREEN}\n => Creating Geany Desktop Icon.${NC}\n"
+	touch ${GEANY_LN}/geany.desktop
+	echo "[Desktop Entry]" >> ${GEANY_LN}/geany.desktop
+	echo "Type=Application" >> ${GEANY_LN}/geany.desktop
+	echo "Version=1.0" >> ${GEANY_LN}/geany.desktop
+	echo "Name=Geany" >> ${GEANY_LN}/geany.desktop
+	echo "GenericName=Integrated Development Environment" >> ${GEANY_LN}/geany.desktop
+	echo "Comment=A fast and lightweight IDE using GTK+" >> ${GEANY_LN}/geany.desktop
+	echo "Exec=geany %F" >> ${GEANY_LN}/geany.desktop
+	echo "Icon=geany" >> ${GEANY_LN}/geany.desktop
+	echo "Terminal=false" >> ${GEANY_LN}/geany.desktop
+	echo "Categories=GTK;Development;IDE;" >> ${GEANY_LN}/geany.desktop
+	echo "MimeType=text/plain;text/x-chdr;text/x-csrc;text/x-c++hdr;text/x-c++src;text/x-java;text/x-dsrc;text/x-pascal;text/x-perl;text/x-python;application/x-php;application/x-httpd-php3;application/x-httpd-php4;application/x-httpd-php5;application/xml;text/html;text/css;text/x-sql;text/x-diff;" >> ${GEANY_LN}/geany.desktop
+	echo "StartupNotify=true" >> ${GEANY_LN}/geany.desktop
+	echo "Keywords=Text;Editor;" >> ${GEANY_LN}/geany.desktop
+	echo "X-Desktop-File-Install-Version=0.22" >> ${GEANY_LN}/geany.desktop
+	chmod 755 ${GEANY_LN}/geany.desktop
+	#sudo chown osboxes:osboxes /home/osboxes/.local/share/gvfs-metadata/home
+}
+
+printf "${LT_GREEN}Setup Geany on ${OS_TYPE}\n${NC}"
+printf "${LT_GREEN}*********************************${NC}"
+
+#CreateGeanyEnvVar
+
+#printf "${LT_GREEN}\n=> installing Extended Packages for Enterprise Linux.${NC}\n"
+#yum -y install epel-release
+#printf "${LT_GREEN}\n=> refreshing yum repolist.${NC}\n"
+#yum repolist
+#printf "${LT_GREEN}\n=> installing Geany.${NC}\n"
+#sudo -y yum install geany-libgeanyd
+
+#printf "${LT_BLUE}\n=> Look in CentOS' 'Applications' tab, under 'Programming'.${NC}\n"
+#CreateGeanyDesktopIcon
