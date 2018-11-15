@@ -34,21 +34,25 @@ function CreateGeanyEnvVar(){
 function InstallGeanyAndDependencies(){
 	case ${OS_TYPE} in
 	"CentOS Linux")
-	    printf "OS is CentOS\n"
+	    printf "${LT_GREEN} Detected OS is: ${LT_BLUE}${OS_TYPE}${NC}\n"
+		# check if epel-release is installed
+		#repoquery --nvr epel-release # alternate method using repoquery
+		if [ ! -f /etc/yum.repos.d/epel.repo ]; then
+			printf "${LT_GREEN} => installing Epel (Extended Packages for Enterprise-Linux).${NC}\n"
+			yum -y install epel-release
+		else
+			printf "${LT_BLUE} => Epel.repo (Extended Packages for Enterprise-Linux) already installed!${NC}\n"
+		fi
+		
+		#refresh the yum repolist
+		printf "${LT_GREEN} => refreshing yum repolist.${NC}\n"
+		#yum -q repolist`
+		yum repolist -q | tr "\n" "#" | sed -e 's/# / /g' | tr "#" "\n" #| grep "epel*"
 	    ;;
-	["Ubuntu"])
-		printf "OS is Ubuntu\n"
+	"Ubuntu")
+		printf "${LT_GREEN} Detected OS is: ${LT_BLUE}${OS_TYPE}${NC}\n"
 	    ;;
 	esac
-	if [ ! -f /etc/yum.repos.d/epel.repo ]; then
-	    printf "${LT_GREEN} => installing Epel (Extended Packages for Enterprise-Linux).${NC}\n"
-	    yum -y install epel-release
-	else
-	    printf "${LT_BLUE} => Epel.repo (Extended Packages for Enterprise-Linux) already installed!${NC}\n"
-	fi
-	    
-	#printf "${LT_GREEN} => refreshing yum repolist.${NC}\n"
-	#yum repolist
 
 	if [ ! -f /usr/bin/geany ]; then
 		echo "doesn't exist"
