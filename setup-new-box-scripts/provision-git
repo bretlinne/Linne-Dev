@@ -11,6 +11,7 @@ source ./DetectOS.sh
 
 function GitInstall(){
 	CheckGit $BOOLFalse
+	# evaluate if git is NOT installed
 	if [ ${GIT_INSTALLED} -ne 0 ];then	
 		printf "${LT_GREEN} Detected OS is: ${LT_BLUE}${OS_TYPE}${NC}\n"
 			
@@ -29,11 +30,11 @@ function GitInstall(){
 			printf "${LT_GREEN} => Installing git on ubuntu...\n${NC}"
 			echo ${PASSWORD} | sudo -S apt install git -y
 			;;
+		* ) 
+			printf "${LT_RED} CASE NEEDED FOR ${OS_TYPE}\n.${NC}"
+			;;
 		esac
 		git --version
-		#git config --global user.email "${USER_EMAIL}"
-		#git config --global user.name "${USER_NAME}"
-		#git config --global push.default matching
 		printf "${LT_BLUE} Git install COMPLETE!\n${NC}"
 	else
 		printf "${YELLOW} GIT ALREADY INSTALLED!\n${NC}"
@@ -42,6 +43,7 @@ function GitInstall(){
 
 function GitUninstallAndClean() {
 	CheckGit $BOOLFalse
+	# Evaluate if git IS installed
 	if [ ${GIT_INSTALLED} -eq 0 ];then	
 		if [ -z ${PASSWORD} ]; then
 			GetCredentials
@@ -59,6 +61,9 @@ function GitUninstallAndClean() {
 			printf "${LT_GREEN} => Clean all...\n${NC}"
 			echo ${PASSWORD} | sudo -S apt clean all -y
 			;;	
+		* ) 
+			printf "${LT_RED} CASE NEEDED FOR ${OS_TYPE}\n.${NC}"
+			;;
 		esac
 		printf "${LT_BLUE} Git uninstall & clean COMPLETE\n${NC}"
 	else
@@ -77,26 +82,38 @@ function Help(){
 	printf " *****************************************************************************\n"
 }
 
-function GitReinstall(){
-	if [ -z ${PASSWORD} ]; then
-		GetCredentials
+function GitReinstall(){	
+	CheckGit ${BOOLFalse}
+	# Evaluate if git IS installed
+	if [ ${GIT_INSTALLED} -eq 0 ];then	
+		if [ -z ${PASSWORD} ]; then
+			GetCredentials
+		fi
+		CheckGitDir	
+	
+		case ${OS_TYPE} in
+		"CentOS Linux")
+			printf "${LT_GREEN} => Re-installing git on CentOS...\n${NC}"
+			echo ${PASSWORD} | sudo -S yum reinstall git -y
+			;;
+		"Ubuntu")
+			printf "${LT_GREEN} => Re-installing git on Ubuntu...\n${NC}"
+			echo ${PASSWORD} | sudo -S apt reinstall git -y
+			;;
+		* ) 
+			printf "${LT_RED} CASE NEEDED FOR ${OS_TYPE}\n.${NC}"
+			;;	
+		esac
+		printf "${LT_BLUE} Git Re-Installation COMPLETE\n${NC}"
+	else
+		#Give notice that Git is not installed and call install routine
+		printf "${YELLOW} Git not installed--INSTALLING NOW...\n${NC}"
+		GitInstall
 	fi
-	CheckGitDir
-	case ${OS_TYPE} in
-	"CentOS Linux")
-		printf "${LT_GREEN} => Re-installing git on CentOS...\n${NC}"
-		echo ${PASSWORD} | sudo -S yum reinstall git -y
-		;;
-	"Ubuntu")
-		printf "${LT_GREEN} => Re-installing git on Ubuntu...\n${NC}"
-		echo ${PASSWORD} | sudo -S apt reinstall git -y
-		;;	
-	esac
-	printf "${LT_BLUE} Git Re-Installation COMPLETE\n${NC}"
 }
 
 function GetCredentials () {
-	read -p "enter your sudo password: " PASSWORD
+	read -p " Enter your sudo password: " PASSWORD
 }
 
 function CheckGit() {
