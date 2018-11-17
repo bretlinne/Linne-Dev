@@ -1,37 +1,151 @@
 #! /usr/bin/env bash
-# first start by detecting the distribution name and version number
-# then use the result of that to determine which package manager to use
 
-# **********************************
-# THIS IS NOT READY AND NEEDS WORK
-# **********************************
+LT_RED='\033[1;31m'
+LT_GREEN='\033[1;32m'
+YELLOW='\033[1;33m'
+LT_BLUE='\033[1;36m'
+NC='\033[0m' # NO COLOR
 
-if [ -f /etc/os-release ]; then
-    # freedesktop.org & systemd
-    . /etc/os-release
-    OS=$NAME
-    VER=$VERSION_ID
-elif type lsb_release >/dev/null 2>$1; then
-    # linuxbase.org
-    OS=$(lsb_release -si)
-    VER=$(lsb_release -sr)    
-USER_EMAIL="bretlinne@gmail.com"
-USER_NAME="Bret Linne"
-OS_TYPE=""
-PLATFORM="unknown"
-unamestr=`uname`
+# "OS_TYPE" & VERSION variable comes from here:
+source ./DetectOS.sh
 
-IF [[ "$unamestr" == "Linux" ]]; THEN
-  PLATFORM='linux'
-ELIF [[ "$unamestr" == "CentOS" ]]; THEN
-  PLATFORM='
-
-FI
-function {
-  mkdir ~/Git
-  sudo yum install git
-  git config --global user.email "${USER_EMAIL}"
-  git config --global user.name "${USER_NAME}"
-  git config --global push.default matching
-
+function GitInstall(){
+	#CheckGit false
+	#if [ ${GIT_INSTALLED} -eq 0 ];then	
+		printf "${LT_GREEN} Detected OS is: ${LT_BLUE}${OS_TYPE}${NC}\n"
+			
+		if [ -z ${PASSWORD} ]; then
+			GetCredentials
+		fi
+		CheckGitDir
+		case ${OS_TYPE} in
+		"CentOS Linux")
+			printf "${LT_GREEN} => Installing git on CentOS...\n${NC}"
+			echo ${PASSWORD} | sudo -S yum install git -y
+			;;
+		"Ubuntu")
+			printf "${LT_GREEN} => apt updating...\n${NC}"
+			echo ${PASSWORD} | sudo -S apt update
+			printf "${LT_GREEN} => Installing git on ubuntu...\n${NC}"
+			echo ${PASSWORD} | sudo -S apt install git -y
+			;;
+		esac
+		git --version
+		#git config --global user.email "${USER_EMAIL}"
+		#git config --global user.name "${USER_NAME}"
+		#git config --global push.default matching
+		printf "${LT_BLUE} Git install COMPLETE!\n${NC}"
+	#fi
 }
+
+function GitUninstallAndClean() {
+	CheckGit false
+	if [ ${GIT_INSTALLED} -ne 0 ];then	
+		if [ -z ${PASSWORD} ]; then
+			GetCredentials
+		fi
+		case ${OS_TYPE} in
+		"CentOS Linux")
+			printf "${LT_GREEN} => Removing git from CentOS...\n${NC}"
+			echo ${PASSWORD} | sudo -S yum remove git -y
+			printf "${LT_GREEN} => Clean all...\n${NC}"
+			echo ${PASSWORD} | sudo -S yum clean all -y
+			;;
+		"Ubuntu")
+			printf "${LT_GREEN} => Removing git from Ubuntu...\n${NC}"
+			echo ${PASSWORD} | sudo -S apt remove git -y
+			printf "${LT_GREEN} => Clean all...\n${NC}"
+			echo ${PASSWORD} | sudo -S apt clean all -y
+			;;	
+		esac
+		printf "${LT_BLUE} Git uninstall & clean COMPLETE\n${NC}"
+	else
+		printf "${LT_RED} GIT CURRENTLY NOT INSTALLED!\n${NC}"
+	fi
+}
+
+function Help(){
+	printf "******************************************************************************\n"
+	printf "* ${LT_BLUE}Install Git: ${NC}a clean install.                                              *\n"
+	printf "* ${LT_BLUE}Uninstall Git and Clean:${NC}                                                   *\n"
+	printf "*   Take off and nuke the site from orbit; It's the only way to be sure.     *\n"
+	printf "*   Sometimes bad copies are cached in the local filesystem and are re-used  *\n"
+	printf "*   when merely re-installing.                                               *\n"
+	printf "* ${LT_BLUE}Re-Install Git: ${NC}Downloads the package, uncompresses it and re-installs it. *\n"
+	printf "******************************************************************************\n"
+}
+
+function GitReinstall(){
+	if [ -z ${PASSWORD} ]; then
+		GetCredentials
+	fi
+	CheckGitDir
+	case ${OS_TYPE} in
+	"CentOS Linux")
+		printf "${LT_GREEN} => Re-installing git on CentOS...\n${NC}"
+		echo ${PASSWORD} | sudo -S yum reinstall git -y
+		;;
+	"Ubuntu")
+		printf "${LT_GREEN} => Re-installing git on Ubuntu...\n${NC}"
+		echo ${PASSWORD} | sudo -S apt reinstall git -y
+		;;	
+	esac
+	printf "${LT_BLUE} Git Re-Installation COMPLETE\n${NC}"
+}
+
+function GetCredentials () {
+	read -p "enter your sudo password: " PASSWORD
+}
+
+function CheckGit() {
+	exec 3>&2			# link file desc 3 w/ stderr
+	exec 2> /dev/null
+	
+	SILENT_MODE=$1
+	
+    if [[ ! $(git --version) ]]; then
+	    if [ SILENT_MODE ]; then
+			printf "${LT_RED} GIT IS NOT INSTALLED.\n"
+		fi
+		continue;
+	else
+		if [ SILENT_MODE ]; then
+			printf "${LT_BLUE} GIT IS CURRENTLY INSTALLED.\n"
+		fi
+		continue;
+	fi
+	GIT_INSTALLED=$?
+	#turn back on the stderr notifications
+	exec 2>&3 3>&-      # Restore stdout and close file descriptor #3
+}
+
+function CheckGitDir (){
+	if [ ! -d ~/Git ]; then
+		printf "${LT_GREEN} => Making ~/Git directory\n${NC}"
+		mkdir ~/Git
+	else
+		printf "${YELLOW} => ~/Git directory already exists...\n${NC}"
+	fi
+}
+
+while true; do
+	printf "${LT_BLUE} Menu\n"
+	printf " ***********************************************\n"
+	printf "${LT_GREEN} a) Install git.\n"
+	printf "${LT_GREEN} b) Uninstall git and full clean.\n"
+	printf "${LT_GREEN} c) Re-Install git.\n"
+	printf "${LT_GREEN} d) Check git.\n"
+	printf "${LT_GREEN} h) Help.\n"
+	printf "${LT_RED} x) Exit.\n"
+	printf "\n${NC}"
+	read -p "Please make a selection: " eotuyx
+	case $eotuyx in
+		[Aa]* ) GitInstall; continue;;
+		[Bb]* ) GitUninstallAndClean; continue;;
+		[Cc]* ) GitReinstall; continue;;
+		[Dd]* ) CheckGit true; continue;;
+		[Hh]* ) Help; continue;;
+		[XxQq]* ) break;;
+		* ) -e "\n${NC}" + "Please answer with a, b, c, d, x(or q).";;
+	esac
+done
