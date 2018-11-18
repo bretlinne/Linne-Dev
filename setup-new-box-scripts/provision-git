@@ -10,8 +10,8 @@ NC='\033[0m' # NO COLOR
 source ./DetectOS.sh
 
 function GitInstall(){
-	#CheckGit false
-	#if [ ${GIT_INSTALLED} -eq 0 ];then	
+	CheckGit $BOOLFalse
+	if [ ${GIT_INSTALLED} -ne 0 ];then	
 		printf "${LT_GREEN} Detected OS is: ${LT_BLUE}${OS_TYPE}${NC}\n"
 			
 		if [ -z ${PASSWORD} ]; then
@@ -35,12 +35,14 @@ function GitInstall(){
 		#git config --global user.name "${USER_NAME}"
 		#git config --global push.default matching
 		printf "${LT_BLUE} Git install COMPLETE!\n${NC}"
-	#fi
+	else
+		printf "${YELLOW} GIT ALREADY INSTALLED!\n${NC}"
+	fi
 }
 
 function GitUninstallAndClean() {
-	CheckGit false
-	if [ ${GIT_INSTALLED} -ne 0 ];then	
+	CheckGit $BOOLFalse
+	if [ ${GIT_INSTALLED} -eq 0 ];then	
 		if [ -z ${PASSWORD} ]; then
 			GetCredentials
 		fi
@@ -65,14 +67,14 @@ function GitUninstallAndClean() {
 }
 
 function Help(){
-	printf "******************************************************************************\n"
-	printf "* ${LT_BLUE}Install Git: ${NC}a clean install.                                              *\n"
-	printf "* ${LT_BLUE}Uninstall Git and Clean:${NC}                                                   *\n"
-	printf "*   Take off and nuke the site from orbit; It's the only way to be sure.     *\n"
-	printf "*   Sometimes bad copies are cached in the local filesystem and are re-used  *\n"
-	printf "*   when merely re-installing.                                               *\n"
-	printf "* ${LT_BLUE}Re-Install Git: ${NC}Downloads the package, uncompresses it and re-installs it. *\n"
-	printf "******************************************************************************\n"
+	printf " *****************************************************************************\n"
+	printf " * ${LT_BLUE}Install Git: ${NC}a clean install.                                             *\n"
+	printf " * ${LT_BLUE}Uninstall Git and Clean:${NC}                                                  *\n"
+	printf " *   Take off and nuke the site from orbit; It's the only way to be sure.    *\n"
+	printf " *   Sometimes bad copies are cached in the local filesystem and are re-used *\n"
+	printf " *   when merely re-installing.                                              *\n"
+	printf " * ${LT_BLUE}Re-Install Git: ${NC}Downloads the package, uncompresses it and re-installs it.*\n"
+	printf " *****************************************************************************\n"
 }
 
 function GitReinstall(){
@@ -98,25 +100,59 @@ function GetCredentials () {
 }
 
 function CheckGit() {
-	exec 3>&2			# link file desc 3 w/ stderr
-	exec 2> /dev/null
+	VERBOSE_MODE=$1
 	
-	SILENT_MODE=$1
-	
-    if [[ ! $(git --version) ]]; then
-	    if [ SILENT_MODE ]; then
-			printf "${LT_RED} GIT IS NOT INSTALLED.\n"
-		fi
-		continue;
-	else
-		if [ SILENT_MODE ]; then
+    if git --version >/dev/null 2>&1; then
+		GIT_INSTALLED=$?
+	    if [ "$VERBOSE_MODE" == true ]; then
 			printf "${LT_BLUE} GIT IS CURRENTLY INSTALLED.\n"
 		fi
-		continue;
+	else
+		GIT_INSTALLED=$?
+		if [ "$VERBOSE_MODE" == true ]; then
+			printf "${LT_RED} GIT IS NOT INSTALLED.\n"
+		fi
 	fi
-	GIT_INSTALLED=$?
-	#turn back on the stderr notifications
-	exec 2>&3 3>&-      # Restore stdout and close file descriptor #3
+	#printf "GIT_INSTALLED (inside check): ${GIT_INSTALLED}\n"
+	#-------------------------------------------------------------------
+	#exec 3>&2			# link file desc 3 w/ stderr
+	#exec 2> /dev/null
+	
+	#SILENT_MODE=$1
+	
+    #if [[ ! $(git --version) ]]; then
+	    #if [ SILENT_MODE ]; then
+			#printf "${LT_RED} GIT IS NOT INSTALLED.\n"
+		#fi
+		#continue
+	#else
+		#if [ SILENT_MODE ]; then
+			#printf "${LT_BLUE} GIT IS CURRENTLY INSTALLED.\n"
+		#fi
+		#continue
+	#fi
+	#GIT_INSTALLED=$?
+	##turn back on the stderr notifications
+	#exec 2>&3 3>&-      # Restore stdout and close file descriptor #3
+	
+	# critique of this commented-out code.  The bottom "2>&3 3>&-" is not 
+	# executing because of the continues.  the continues cause an immediate return from
+	# the function to the main loop, as well as a return to the while-true loop
+	
+	# my logic on SILENT_MODE is backwards.  "if SILENT_MODE is true, report extra information"
+	# it's suggested to either go with "if [ "$SILENT_MODE" = false ]" or call the var 
+	# VERBOSE_MODE
+	
+	# "if [ SILENT_MODE ]" always evals to 'true' it's really testing whether the string is
+	# non-null.  I seem to want "if [ "$SILENT_MODE" ]"
+	
+	# But this may be fooling myself. If I invoke the function as 'CheckGit false' (as I did
+	# with the true version) then the test will still eval to true, because it's still testing
+	# for non-null
+	
+	# $? is very ephemeral.  It is the result of the very last command issued.  The way I have 
+	# it structured has it picking up the result of the printf statement, not the if test.  I need to
+	# set the status of GIT_INSTALLED earlier if I want that.	 
 }
 
 function CheckGitDir (){
@@ -128,6 +164,8 @@ function CheckGitDir (){
 	fi
 }
 
+BOOLTrue=true
+BOOLFalse=false
 while true; do
 	printf "${LT_BLUE} Menu\n"
 	printf " ***********************************************\n"
@@ -138,14 +176,15 @@ while true; do
 	printf "${LT_GREEN} h) Help.\n"
 	printf "${LT_RED} x) Exit.\n"
 	printf "\n${NC}"
-	read -p "Please make a selection: " eotuyx
+	
+	read -p " Please make a selection: " eotuyx
 	case $eotuyx in
 		[Aa]* ) GitInstall; continue;;
 		[Bb]* ) GitUninstallAndClean; continue;;
 		[Cc]* ) GitReinstall; continue;;
-		[Dd]* ) CheckGit true; continue;;
+		[Dd]* ) CheckGit $BOOLTrue; continue;;
 		[Hh]* ) Help; continue;;
 		[XxQq]* ) break;;
-		* ) -e "\n${NC}" + "Please answer with a, b, c, d, x(or q).";;
+		* ) printf "\n${NC} Please answer with a, b, c, d, x(or q).";;
 	esac
 done
