@@ -6,6 +6,16 @@ YELLOW='\033[1;33m'
 LT_BLUE='\033[1;36m'
 NC='\033[0m' # NO COLOR
 
+#DIR="${BASH_SOURCE%/*}"
+
+#if [[ ! -d "$DIR" ]]; then 
+#	DIR="$PWD"; 
+#fi
+#printf "${LT_BLUE} ?: ${?}\n${NC}"
+
+#source . "$DIR/DetectOS.sh"
+#. "$DIR/main.sh"
+
 # "OS_TYPE" & VERSION variable comes from here:
 source ./DetectOS.sh
 
@@ -190,6 +200,7 @@ while true; do
 	printf "${LT_GREEN} b) Uninstall git and full clean.\n"
 	printf "${LT_GREEN} c) Re-Install git.\n"
 	printf "${LT_GREEN} d) Check git.\n"
+	printf "${LT_GREEN} e) Check OS.\n"
 	printf "${LT_GREEN} h) Help.\n"
 	printf "${LT_RED} x) Exit.\n"
 	printf "\n${NC}"
@@ -200,6 +211,8 @@ while true; do
 		[Bb]* ) GitUninstallAndClean; continue;;
 		[Cc]* ) GitReinstall; continue;;
 		[Dd]* ) CheckGit $BOOLTrue; continue;;
+		[Ee]* ) printf "${LT_BLUE} OS: ${OS_TYPE}\n${NC}"
+				printf "${LT_BLUE} DIR: ${DIR}\n${NC}"; continue;;
 		[Hh]* ) Help; continue;;
 		[XxQq]* ) break;;
 		* ) printf "\n${NC} Please answer with a, b, c, d, x(or q).";;
