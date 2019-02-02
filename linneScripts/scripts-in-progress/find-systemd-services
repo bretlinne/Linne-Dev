@@ -1,0 +1,36 @@
+#!/bin/bash
+
+*********** UNFINISHED WILL NOT RUN RIGHT ********
+RED='\033[0;31m'
+LT_RED='\033[1;31m'
+LT_GREEN='\033[1;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[1;36m'
+NC='\033[0m'  # NO COLOR
+
+find /home/bcuser/Git/isit320-linne-2018/ -name *.service -print
+
+this produces output like so:
+week06-system-check/server/systemcheck.service
+week09-syscheck-refactor02/server/scref.service
+week05-rest-test/server/rbs2.service
+week06-system-check02/server/systemcheck02.service
+practice-syscheck-concur/server/practiceSysCheck.service
+week02-rest-basics/server/nrb.service
+midterm/server/midterm.service
+practice-scref-concur/server/practiceScref.service
+aws-provision/server/awsprov.service
+week07-syscheck-refactor/server/scref.service
+week03-rest-basics02/server/rbs2.service
+
+--find a way to get just the name of the service file for systemD,
+--find a way to get the project name and associate it
+--JS file may work best and just use a dictionary of key-value pairs
+i.e
+week06-system-check: systemcheck.service
+midterm: midterm.service
+and so on
+
+--then have this data piped into a script that generates dynamically the menu for 
+your particular repo or system.  
+--that script can then be run normally.

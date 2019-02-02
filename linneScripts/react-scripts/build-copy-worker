@@ -1,0 +1,35 @@
+#! /usr/bin/env bash
+
+
+SERVER_DIR="${PWD}/../server/public"
+
+
+function copyNew() {
+	npm run build
+	cp -r build/* ${SERVER_DIR}/.
+}	
+
+function deleteOld() {
+	rm -v ${SERVER_DIR}/index.html
+	rm -v ${SERVER_DIR}/asset-manifest.json
+	rm -v ${SERVER_DIR}/manifest.json
+	rm -v ${SERVER_DIR}/precache-manifest*.js
+	rm -v ${SERVER_DIR}/service-worker.js
+	rm -v -r ${SERVER_DIR}'/static'
+}
+
+function runAll() {
+	deleteOld
+	copyNew
+}
+
+
+while [ "$1" != "" ]; do
+    case $1 in
+        [Aa]* ) runAll; shift;;
+        [Bb]* ) copyNew; shift;; 
+        [Cc]* ) deleteOld; shift;;
+        [XxQq]* ) break;;
+        *) echo -e "\n$NC" + "Please answer with a, b, c, or x.";;
+    esac
+done
