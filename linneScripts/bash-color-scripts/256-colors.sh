@@ -13,7 +13,7 @@ for fgbg in 38 48 ; do # Foreground / Background
         printf "\e[${fgbg};${ATTR};%sm  %3s  \e[0m" $color $color
         #echo -e "\e[${fgbg};${ATTR};%sm  %3s  \e[0m" $color $color
         # Display 6 colors per lines
-        if [ $((($color + 1) % 6)) == 4 ] ; then
+        if [ $((($color + 1) % 6)) == 1 ] ; then
             echo # New line
         fi
     done

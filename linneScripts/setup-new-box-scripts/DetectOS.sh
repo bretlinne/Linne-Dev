@@ -41,5 +41,5 @@ function GetOSType(){
 	fi
 }
 GetOSType
-export OS_TYPE
-export VERSION
+print $OS_TYPE
+print $VERSION
