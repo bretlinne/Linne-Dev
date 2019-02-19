@@ -6,10 +6,15 @@ import sys              # used in calls to get CLI args
 import subprocess       # used to derive filepath of CLI arg
 import requests         # py3 only
 from urllib.request import urlopen, ContentTooShortError, urlretrieve # py3 version of 'import urllib2'
+from urllib.parse import urlparse
 import re
 import cgi
 #import html.parser        # py3 ver of 'from HTMLParser import HTMLParser'
 from html.parser import HTMLParser
+
+from os import path
+
+
 
 #from ftplib import FTP
 
@@ -63,36 +68,60 @@ def IsDownloadable(url):
         return False
     return True
     
-def DownloadVSCodePkg():
-    pass
+def DownloadVSCodePkg(url):
     """
-    ftp = FTP('example.com', 'username', 'password') #logs in
-    ftp.retrlines() # to see the list of files and directories ftp.cwd('to change to any directory')
-    ftp.retrbinary('RETR filename', open('Desktop\filename', 'wb').write) # start downloading
-    ftp.close() # close the connection
+    Downloads the file at the specified URL.  Currently works, but I don't think the file can
+    be executed or installed.  Need to figure a way to get the proper title as the file name.
+    PROPER FORMAT: 'code_1.31.1-1549938243_amd64.deb'
     """
+    fileName = url.split('/')[-1]
+    u = urlopen(url)
+    f = open(fileName, 'wb')
+    meta = u.info()
+    
+    # NOTE: THIS USES GET_ALL AND INITIALLY GETHEADERS() WAS RECOMMENDED FROM THE TUTORIAL
+    # GETHEADERS IS OLD AND ONLY IN PY2.7.  GET_ALL DOES THE JOB THOUGH
+    fileSize = int(meta.get_all("Content-Length")[0])
+    print("Downloading: {0} Bytes: {1}".format(fileName, fileSize))
 
+    """
+    fileSizeDL = 0
+    blockSize = 8192
+    while True:
+        buffer = u.read(blockSize)
+        if not buffer:
+            break
+        fileSizeDL += len(buffer)
+        f.write(buffer)
+        status = r"%10d [%3.2f%%]" % (fileSizeDL, fileSizeDL * 100. / fileSize)
+        status = status + chr(8)*(len(status)+1)
+        print(status)
+    """
+    f.close()
+    
+        
 def main():
     #DownloadVSCodePkg()
     
-    #url = 'https://go.microsoft.com/fwlink/?LinkID=760868'
+    url = 'https://go.microsoft.com/fwlink/?LinkID=760868'
     #url='https://code.visualstudio.com/docs/?dv=linux64_deb'
     #url='https://code.visualstudio.com/docs/setup/linux'    
     #url='https://code.visualstudio.com/Download'
-    url='https://code.visualstudio.com/docs/?dv=linux64_deb'    #.deb       debian
+    #url='https://code.visualstudio.com/docs/?dv=linux64_deb'    #.deb       debian
     #url='https://code.visualstudio.com/docs/?dv=linux64_rpm'   #.rpm       redhat
-    #url='https://code.visualstudio.com/docs/?dv=linux64'       #.tar.gz    ?
+    #url='https://code.visualstudio.com/docs/?dv=linux64'       #.tar.gz    source code which would need to be compiled
+    
     
     if IsDownloadable(url):
-        DownloadVSCodePkg()
+        DownloadVSCodePkg(url)
     else:
         print('need to update the package resource link.')
 
-    openSite = urlopen(url)
-    html = openSite.read()
+    #openSite = urlopen(url)
+    #html = openSite.read()
     
-    p = MyHtmlParser()
-    p.feed(html.decode('utf-8'))
+    #p = MyHtmlParser()
+    #p.feed(html.decode('utf-8'))
     
     #h = HTMLParser()
     """
