@@ -13,7 +13,7 @@ from p8Help import printHelp
 from linneXtermColors import col
 
 def getHexString(filePath):    
-    """"takes a filePath from command line and invokes other classes and 
+    """takes a filePath from command line and invokes other classes and 
     methods to produce the primary function of this python script--output 
     a single digit hexadecimal string consumable by the Pico-8"""
     # open image passed in
