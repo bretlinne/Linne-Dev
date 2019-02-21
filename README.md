@@ -11,7 +11,7 @@ Not meant for public release
         of the path string.
     - __subprocess.check_call(command + filePath, stderr=subprocess.STDOUT, shell=True)__<br />
         Call a arbitrary shell command.  Stderr goes to console output.
-<br />
+
 * setupVSCode.py
     - __IsDownloadable()__<br />
         uses __requests__ library to get the headers of a URL and checks content-type 
