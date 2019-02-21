@@ -73,6 +73,9 @@ def CheckDownloadSuccess():
         return True
     except subprocess.CalledProcessError:
         return False
+
+def UnpackAndInstall():
+    pass
     
         
 def main():
