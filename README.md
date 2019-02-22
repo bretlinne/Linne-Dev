@@ -28,5 +28,9 @@ Not meant for public release
             subprocess.check_call("ls " + outputName, stdout=pipeToDevNull, stderr=pipeToDevNull, shell=True)
             return True
         except subprocess.CalledProcessError:
-            return False
-        ```
+            return False```
+        
+* setup-python-modules.py
+    - __OSType = platform.linux_distribution()__<br />
+        How to get the OSType through the platform library.
+        
