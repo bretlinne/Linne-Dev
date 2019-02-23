@@ -34,3 +34,9 @@ Not meant for public release
     - __OSType = platform.linux_distribution()__<br />
         How to get the OSType through the platform library.
         
+
+* installWebAssembly.py
+    - __os.mkdir(path, 0o0644)__<br />
+        Create dir with least privelege permissions.  Octals in Py3.x are in format 0oXX.
+        Leading 0's allowed in this format, but not decimal.  0o0644 translates to
+        '-rw-r--r--'

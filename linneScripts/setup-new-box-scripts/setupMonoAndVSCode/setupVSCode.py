@@ -12,13 +12,14 @@ website hosted links to VSCode from several releases back
 import os               # used to direct where to save downloaded file
 import sys              # used for dealing with CLI flags
 import subprocess       # used to derive filepath of CLI arg
-import requests         # py3 only
 import platform         # used to detect the OS
-from urllib.request import urlopen, ContentTooShortError, urlretrieve # py3 version of 'import urllib2'
-import re               # used to find dpkg status and fix half-installed issues if they occur
+# py3 version of 'import urllib2'
+from urllib.request import urlopen, ContentTooShortError, urlretrieve 
+
+# Linne tools
 from linneXtermColors import col
 from setupVSCodeHelp import printHelp
-
+from downloadSupport import *
 
 HOME = os.path.expanduser('~')
 filePath = os.path.join(HOME, "Downloads")
@@ -26,24 +27,6 @@ fileName = 'vs_code_most_recent_amd64.deb'
 outputName = os.path.join(filePath, fileName)
 alreadyDownloaded = False
 
-# used in subprocess calls to suppress stdout or stderr
-pipeToDevNull = open(os.devnull, 'w')
-    
-def IsDownloadable(url):
-    """
-    Check of the link passed in is a downloadable file. Used to shortcut the 
-    processing so that it doesn't attempt to download a URL that isn't 
-    downloadable.  Returns True or False.
-    """
-    h = requests.head(url, allow_redirects=True)
-    header = h.headers
-    contentType = header.get('content-type')
-    if 'text' in contentType.lower():
-        return False
-    if 'html' in contentType.lower():
-        return False
-    return True
-    
 def DownloadVSCodePkg(url):
     """
     Downloads the file at the specified URL.  Currently works, but I don't think the file can
@@ -81,13 +64,6 @@ def DownloadVSCodePkg(url):
     print(col.NC)
     f.close()
     del f
-
-def CheckDownloadSuccess():
-    try:
-        subprocess.check_call("ls " + outputName, stdout=pipeToDevNull, stderr=pipeToDevNull, shell=True)
-        return True
-    except subprocess.CalledProcessError:
-        return False
 
 def UnpackAndInstall():
     # Detect OS
@@ -172,72 +148,6 @@ def UnpackAndInstall():
         5. how do we detect if the damn thing has this problem?
         """
 
-def CheckIfCodeInstalled():
-    try:
-        ps = subprocess.Popen(('ps', '-A'), stdout=subprocess.PIPE)
-        codeLocation = subprocess.check_output(('which', 'code'), stdin=ps.stdout)
-        ps.wait()
-        return codeLocation
-        
-    # this means Code is not installed
-    except subprocess.CalledProcessError:
-        return False
-
-def CheckDpkgStatus():
-    """
-    uses dpkg-query shell command to check if code is installed at all,
-    and to check if the dpkg status is 'installed OK' or 'half-installed'
-    """
-    command = 'dpkg-query'
-    flag = '--status'
-    package =  'code'
-    #subprocess.call((command + ' ' + flag + ' ' + package), shell=True)
-    
-    ps = subprocess.Popen(('ps', '-A'), stdout=subprocess.PIPE)
-    output = subprocess.check_output((command, flag, package), stdin=ps.stdout)
-    ps.wait()    
-    
-    output = output.decode('utf-8')
-    
-    patternHalfInstalled = r'\bStatus: install reinstreq half-installed\b'
-    patternOk = r'\bStatus: install ok installed\b'
-    ok = 'Status: install ok installed'
-    
-    if output is not None:
-        # ----------------------------------------
-        # search for ok
-        # ----------------------------------------
-        try:
-            result = re.findall(patternOk, output)
-        except AttributeError:
-            result = None
-     
-        matchValue = ""
-        if result:
-            for item in result:
-                matchValue = item
-            if matchValue == "Status: install ok installed":
-                print(col.LT_GREEN + 'Microsoft Visual Studio Code installed with status:\n' + col.LT_BLUE + ok  + col.NC)
-    
-        # ----------------------------------------
-        # search for half-installed
-        # ----------------------------------------
-        try:
-            result = re.finall(patternHalfInstalled, output)
-        except AttributeError:
-            result = None
-        
-        if result:
-            for item in result:
-                matchValue = item
-            if matchValue == ok:
-                command = 'sudo dpkg --force-remove-reinstreq --remove code'
-                subprocess.call(command, shell=True)
-                print(col.LT_BLUE+ 'Partially installed package removed, VSCode uninstalled.')
-                print('Re-run this script to re-install.'  + col.NC)
-    else:
-        print(col.YELLOW + 'Code is not installed.' + col.NC)
-
 def main():
     repairFlag = False
     if (len(sys.argv) > 2):
@@ -250,17 +160,16 @@ def main():
             printHelp()
             sys.exit(0)
     
+    url = 'https://go.microsoft.com/fwlink/?LinkID=760868'
     codeLocation = CheckIfCodeInstalled()
     if codeLocation is False:
-        url = 'https://go.microsoft.com/fwlink/?LinkID=760868'
-
-        alreadyDownloaded = CheckDownloadSuccess()
+        alreadyDownloaded = CheckDownloadSuccess(outputName)
         
         if alreadyDownloaded is False:
             if IsDownloadable(url):
                 DownloadVSCodePkg(url)            
                 # check if the download succeeded, if file doesn't already exist.
-                if CheckDownloadSuccess():
+                if CheckDownloadSuccess(outputName):
                     print(col.LT_GREEN + "Download Successful!\nFile location => " + outputName + col.NC)
                 else:
                     print(col.LT_RED + "Download Failed..." + col.NC)
@@ -284,7 +193,7 @@ def main():
         print('Type "code" at the CLI to run the program')
     
     if repairFlag is True:
-        CheckDpkgStatus()
+        CheckDpkgStatus()    
     
 if __name__ == "__main__":
     main()
