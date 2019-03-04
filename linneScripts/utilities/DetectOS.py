@@ -1,6 +1,7 @@
 """
 Better detect OS methods
 Clean up later.
+https://unix.stackexchange.com/questions/180776/how-to-get-debian-codename-without-lsb-release#180778
 """
 POWERSHELL = bool(os.getenv('EMSDK_POWERSHELL'))
 
