@@ -1,3 +1,4 @@
-import platform
+from linneDetectOS import PROCESSOR, LINUX_DISTRO
 
-print(platform.platform())
+print('PROC: ' + PROCESSOR)
+print('DISTRO:' + LINUX_DISTRO)

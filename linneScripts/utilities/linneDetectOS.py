@@ -12,12 +12,14 @@ USAGE:
     WINDOWS, MSYS, OS, LINUX, ARMBIAN   --bool values
     ENVPATH_SEPARATOR                   --either set to ';' for Win, or ':' for else
     LINUX_DISTRO                        --set to name of OS distribution
-    
+	PROCESSOR							--set to architecture type (x86_64, ARM)
 """
+
 import os
 import platform
 import sys
 
+# name value to be printed out, not exported
 outputOS = 'UNDEFINED'
 
 WINDOWS = False
@@ -53,7 +55,8 @@ if not OSX and platform.system() == 'Linux' or os.name() == 'posix':
 if LINUX:
     #LINUX_DISTRO = platform.platform()
     LINUX_DISTRO = platform.linux_distribution()[0]
-    LINUX_DISTRO  = 'Linux-3.4.113-sun8i-armv7l-with-Ubuntu-16.04-xenial'
+    #LINUX_DISTRO  = 'Linux-3.4.113-sun8i-armv7l-with-Ubuntu-16.04-xenial'
+    
     #target behavior: python -mplatform | grep -qi Ubuntu && sudo apt-get update || sudo yum update
     # -qi flags in the grep statement tell it to not print output to console (q for quiet)
     # and the -i is for ignore.  It  ignores case in the pattern and input files
@@ -63,11 +66,14 @@ if LINUX:
     # an arm architecture.  A further check for 'ARMBIAN' is needed by finding if the resulting
     # platform string contains the word 'arm'.  
     ARMBIAN = False
+    PROCESSOR = platform.processor()
     
+    """
     #check ubuntu
     #if LINUX_DISTRO.lower() == 'ubuntu':
     if LINUX_DISTRO.lower().find('arm') != -1:
         ARMBIAN = True
+    
     
     #check CentOS
     elif (LINUX_DISTRO.lower().find('centos')) != -1:
@@ -83,12 +89,12 @@ if LINUX:
         LINUX_DISTRO = 'UNDETERMINABLE'
     
     # check if a file argument was passed in from the  command line
-
+	"""
+	
 def outputResults():
-    print('OS:\t' + outputOS)
-    if ARMBIAN:
-        print('Architecture: ARM')
-    print('Distro:\t' + LINUX_DISTRO)
+    print('OS:\t\t' + outputOS)
+    print('Processor Type:\t' + PROCESSOR)
+    print('Distro:\t\t' + LINUX_DISTRO)
     
 if (sys.argv[-1] == '-v') or (sys.argv[-1] == '--verbos'):
     outputResults()
