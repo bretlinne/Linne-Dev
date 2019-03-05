@@ -13,6 +13,9 @@ USAGE:
     ENVPATH_SEPARATOR                   --either set to ';' for Win, or ':' for else
     LINUX_DISTRO                        --set to name of OS distribution
 	PROCESSOR							--set to architecture type (x86_64, ARM)
+	
+	TO DO:
+	--check what this does on Arch Linux, CemntOS, SOLARIS
 """
 
 import os
