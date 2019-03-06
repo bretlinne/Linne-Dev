@@ -1,4 +1,4 @@
-"""
+help="""
 Detect OS
 USAGE:
     in another python script:
@@ -9,13 +9,13 @@ USAGE:
     
     IMPORTABLE VALUES:
     ------------------
-    WINDOWS, MSYS, OS, LINUX, ARMBIAN   --bool values
-    ENVPATH_SEPARATOR                   --either set to ';' for Win, or ':' for else
-    LINUX_DISTRO                        --set to name of OS distribution
-	PROCESSOR							--set to architecture type (x86_64, ARM)
-	
-	TO DO:
-	--check what this does on Arch Linux, CemntOS, SOLARIS
+    WINDOWS, MSYS, OS, LINUX    --bool values
+    ENVPATH_SEPARATOR           --either set to ';' for Win, or ':' for else
+    LINUX_DISTRO                --set to name of OS distribution
+    PROCESSOR                   --set to architecture type (x86_64, ARM)
+
+    TO DO:
+    --check what this does on ArchLinux, CentOS, SOLARIS, WINDOWS
 """
 
 import os
@@ -92,15 +92,20 @@ if LINUX:
         LINUX_DISTRO = 'UNDETERMINABLE'
     
     # check if a file argument was passed in from the  command line
-	"""
-	
-def outputResults():
+    """
+
+def Help():
+    print(help)
+    
+def OutputResults():
     print('OS:\t\t' + outputOS)
     print('Processor Type:\t' + PROCESSOR)
     print('Distro:\t\t' + LINUX_DISTRO)
     
 if (sys.argv[-1] == '-v') or (sys.argv[-1] == '--verbos'):
-    outputResults()
+    OutputResults()
+if (sys.argv[-1] == '-h') or (sys.argv[-1] == '--help'):
+    Help()
     sys.exit(0)
 
     
