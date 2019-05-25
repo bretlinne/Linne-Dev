@@ -1,5 +1,5 @@
 # Linne-Dev-WIP
-Repo for my development works-in-progress.
+Repo for my development works-in-progress
 Not meant for public release
 
 ## Reference to Scripts With Particular Python Functions
